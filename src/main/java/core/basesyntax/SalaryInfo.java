@@ -17,81 +17,67 @@ public class SalaryInfo {
 
         LocalDate from = LocalDate.parse(dateFrom.trim(), FORMATTER);
         LocalDate to = LocalDate.parse(dateTo.trim(), FORMATTER);
-
-        int [] salaries = new int[names.length];
-
-        for (String entry : data) {
-
-            String[] parts = entry.split("\\s+");
-            if (parts.length != EXPECTED_PARTS) {
-                continue;
-            }
-            LocalDate workDate;
-            try {
-                workDate = LocalDate.parse(parts[DATE_INDEX], FORMATTER);
-            } catch (Exception e) {
-                continue;
-            }
-            if (workDate.isBefore(from) || workDate.isAfter(to)) {
-                continue;
-            }
-            String name = parts[NAME_INDEX];
-            int index = findIndex(names, name);
-            if (index == -1) {
-                continue;
-            }
-            int hours;
-            int rate;
-            try {
-                hours = Integer.parseInt(parts[HOURS_INDEX]);
-                rate = Integer.parseInt(parts[RATE_INDEX]);
-            } catch (Exception e) {
-                continue;
-            }
-            salaries[index] += hours * rate;
-        }
-
         StringBuilder sb = new StringBuilder();
         sb.append("Report for period ")
                 .append(dateFrom)
                 .append(" - ")
                 .append(dateTo)
                 .append(System.lineSeparator());
-
-        for (int i = 0; i < names.length; i++) {
-            sb.append(names[i])
+        for (String name : names) {
+            int totalSalary = 0;
+            for (String entry : data) {
+                String[] parts = entry.split("\\s+");
+                if (parts.length != EXPECTED_PARTS) {
+                    continue;
+                }
+                LocalDate workDate;
+                try {
+                    workDate = LocalDate.parse(parts[DATE_INDEX], FORMATTER);
+                } catch (Exception e) {
+                    continue;
+                }
+                if (workDate.isBefore(from) || workDate.isAfter(to)) {
+                    continue;
+                }
+                if (!parts[NAME_INDEX].equals(name)) {
+                    continue;
+                }
+                int hours;
+                int rate;
+                try {
+                    hours = Integer.parseInt(parts[HOURS_INDEX]);
+                    rate = Integer.parseInt(parts[RATE_INDEX]);
+                } catch (Exception e) {
+                    continue;
+                }
+                totalSalary += hours * rate;
+            }
+            sb.append(name)
                     .append(" - ")
-                    .append(salaries[i])
+                    .append(totalSalary)
                     .append(System.lineSeparator());
-        }
 
+        }
         return sb.toString().trim();
     }
 
-    private static int findIndex(String[] names, String target) {
-        for (int i = 0; i < names.length; i++) {
-            if (names[i].equals(target)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public static void main(String [] args) {
+    public static void main(String[]args) {
         String[] names = {"John", "Andrew", "Kate"};
-        String[] data = { "26.04.2019 John 4 50",
+        String[] data = {"26.04.2019 John 4 50",
                 "05.04.2019 Andrew 3 200",
                 "10.04.2019 John 7 100",
                 "22.04.2019 Kate 9 100",
                 "25.06.2019 John 11 50",
                 "26.04.2019 Andrew 3 150",
                 "13.02.2019 John 7 100",
-                "26.04.2019 Kate 9 100" };
+                "26.04.2019 Kate 9 100"
+        };
         String dateFrom = "01.04.2019";
         String dateTo = "30.04.2019";
         String report = getSalaryInfo(names, data, dateFrom, dateTo);
         System.out.println(report);
     }
 }
+
 
 
